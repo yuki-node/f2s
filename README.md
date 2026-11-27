@@ -1,11 +1,12 @@
 # f2s
 
-f2s 在 macOS Finder 工具栏中添加一个原生下拉菜单，方便你在浏览文件夹时使用终端。
+f2s 在 macOS Finder 工具栏中添加一个原生下拉菜单，方便你在当前文件夹打开终端、复制路径或创建文件。
 
 ![Finder 工具栏中的 f2s 菜单已展开，显示 Open Shell 和 Copy Path 两个选项](docs/images/finder-toolbar-menu.png)
 
 - **Open Shell** 在当前文件夹打开用户配置的终端，例如 iTerm2 或系统「终端」。新会话使用该终端配置的 shell。
 - **Copy Path** 将当前文件夹的绝对路径以纯文本复制到剪贴板，保留中文、空格和特殊字符。
+- **New File…** 输入完整文件名（例如 `test.txt`、`test.log` 或 `.gitignore`），按回车即可在当前文件夹创建空文件，并在 Finder 中选中它。同名时可以重新输入。
 
 支持 macOS 11 及以上版本，安装包同时包含 Apple 芯片和 Intel 架构。
 
@@ -24,7 +25,7 @@ bash build.sh
 ## 安装与使用
 
 1. 双击构建生成的 `.pkg`，按提示完成安装。应用会安装到 `/Applications/f2s.app`，安装程序会为当前桌面账户注册 Finder 扩展。
-2. 在 Finder 中打开文件夹，单击工具栏的 **f2s** 图标，选择 **Open Shell** 或 **Copy Path**。在没有实际文件夹路径的视图中，这两个选项不可用。
+2. 在 Finder 中打开文件夹，单击工具栏的 **f2s** 图标，选择所需操作。
 3. 如果看不到按钮，从「应用程序」打开 f2s，按提示启用 Finder 扩展。已启用时，可在 Finder 的「显示 → 自定工具栏」中添加 f2s 按钮。其他账户可以单独启用或停用扩展。
 
 f2s 优先使用 macOS 为 Unix 可执行文件登记的默认终端（Shell 角色）。如果你使用 iTerm2，可在其应用菜单中选择 **Make iTerm2 Default Term**。如果该关联不可用，f2s 会尝试与 `.command` 文件关联的终端，最后回退到系统「终端」。

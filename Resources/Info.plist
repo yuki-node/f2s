@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.6.2</string>
+	<string>1.7.1</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -32,12 +32,12 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>10</string>
+	<string>13</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>11.0</string>
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>需要读取当前 Finder 文件夹，以便打开 Shell 或复制路径。</string>
+	<string>需要读取当前 Finder 文件夹，以便打开 Shell、复制路径或新建文件。</string>
 </dict>
 </plist>

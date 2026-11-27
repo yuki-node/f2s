@@ -37,19 +37,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             let current = try FinderDirectory.current()
             // Launch Services URLs can also arrive from other apps. Only operate on the
             // real Finder directory, and only if it is still the one from the original click.
-            guard ShellRequest.matches(request, currentDirectory: current) else {
-                finishWithAlert("无法打开终端", detail: "请在目标 Finder 窗口中重新选择 Open Shell。")
+            guard let action = FinderRequest.matching(request, currentDirectory: current) else {
+                finishWithAlert("Finder 目录已更改", detail: "请在目标 Finder 窗口中重新选择操作。")
                 return
             }
             directory = current
-            openShell()
+            switch action {
+            case .openShell: openShell()
+            case .newFile: newFile()
+            }
         } catch {
             finishWithAlert("无法获取 Finder 目录", detail: error.localizedDescription)
         }
     }
 
     private func showActions(at point: NSPoint) {
-        let size = NSSize(width: 152, height: 68)
+        let actions = [("Open Shell", "terminal", #selector(openShell)),
+                       ("Copy Path", "doc.on.doc", #selector(copyPath)),
+                       ("New File…", "doc.badge.plus", #selector(newFile))]
+        let size = NSSize(width: 152, height: CGFloat(actions.count * 30 + 8))
         let panel = ActionPanel(contentRect: NSRect(origin: .zero, size: size),
                                 styleMask: [.borderless], backing: .buffered, defer: false)
         panel.title = "f2s"
@@ -67,10 +73,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         background.layer?.cornerRadius = 9
         background.layer?.masksToBounds = true
         panel.contentView = background
-        let actions = [("Open Shell", "terminal", #selector(openShell)), ("Copy Path", "doc.on.doc", #selector(copyPath))]
         for (index, action) in actions.enumerated() {
             let button = NSButton(title: action.0, target: self, action: action.2)
-            button.frame = NSRect(x: 6, y: 35 - index * 30, width: 140, height: 28)
+            button.frame = NSRect(x: 6, y: size.height - 33 - CGFloat(index * 30), width: 140, height: 28)
             button.image = NSImage(systemSymbolName: action.1, accessibilityDescription: nil)
             button.imagePosition = .imageLeading
             button.alignment = .left
@@ -116,6 +121,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         } else {
             finishWithAlert("无法复制路径", detail: "写入剪贴板失败，请重试。")
         }
+    }
+
+    @objc private func newFile() {
+        guard let directory else { return }
+        panel?.delegate = nil
+        panel?.orderOut(nil)
+        NSApp.activate(ignoringOtherApps: true)
+
+        if let file = NewFilePanel(directory: directory).run() {
+            NSWorkspace.shared.activateFileViewerSelecting([file])
+        }
+        NSApp.terminate(nil)
     }
 
     private func finishWithAlert(_ title: String, detail: String) {

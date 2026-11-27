@@ -10,7 +10,7 @@ final class FinderMenu: FIFinderSync {
     }
 
     override var toolbarItemName: String { "f2s" }
-    override var toolbarItemToolTip: String { "打开 Shell 或复制当前文件夹路径" }
+    override var toolbarItemToolTip: String { "打开 Shell、复制路径或新建文件" }
     override var toolbarItemImage: NSImage {
         let image = Bundle(for: Self.self).image(forResource: "AppIcon") ?? NSImage(named: NSImage.folderName)!
         image.size = NSSize(width: 16, height: 16)
@@ -24,7 +24,8 @@ final class FinderMenu: FIFinderSync {
         menu.autoenablesItems = false
         let open = menu.addItem(withTitle: "Open Shell", action: #selector(openShell(_:)), keyEquivalent: "")
         let copy = menu.addItem(withTitle: "Copy Path", action: #selector(copyPath(_:)), keyEquivalent: "")
-        for item in [open, copy] {
+        let newFile = menu.addItem(withTitle: "New File…", action: #selector(newFile(_:)), keyEquivalent: "")
+        for item in [open, copy, newFile] {
             item.target = self
             item.representedObject = folder
             item.isEnabled = folder?.isFileURL == true
@@ -32,32 +33,46 @@ final class FinderMenu: FIFinderSync {
         return menu
     }
 
+    private func targetFolder(for item: NSMenuItem) -> URL? {
+        // Finder can deliver a menu command without its original representedObject.
+        item.representedObject as? URL ?? FIFinderSyncController.default().targetedURL()
+    }
+
     @objc private func openShell(_ sender: NSMenuItem) {
-        guard let folder = sender.representedObject as? URL ?? FIFinderSyncController.default().targetedURL() else { return }
+        guard let folder = targetFolder(for: sender) else { return }
         let directLaunch = NSWorkspace.OpenConfiguration()
         directLaunch.promptsUserIfNeeded = false
         FolderActions.openShell(in: folder, configuration: directLaunch) { error in
             guard error != nil else { return }
             // A sandboxed extension cannot always pass a protected folder to another app.
             // Never run a modal alert here: Finder needs this process to serve the next menu.
-            let extensionURL = Bundle(for: FinderMenu.self).bundleURL
-            let host = extensionURL.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-            guard let request = ShellRequest.url(for: folder) else { NSSound.beep(); return }
-            let handoff = NSWorkspace.OpenConfiguration()
-            handoff.createsNewApplicationInstance = true
-            handoff.addsToRecentItems = false
-            NSWorkspace.shared.open([request], withApplicationAt: host, configuration: handoff) { _, failure in
-                if let failure {
-                    Logger(subsystem: "local.finder-to-iterm", category: "FinderMenu")
-                        .error("Could not launch the containing app: \((failure as NSError).code)")
-                    DispatchQueue.main.async { NSSound.beep() }
-                }
+            self.launchHost(for: .openShell, in: folder)
+        }
+    }
+
+    @objc private func newFile(_ sender: NSMenuItem) {
+        guard let folder = targetFolder(for: sender) else { return }
+        launchHost(for: .newFile, in: folder)
+    }
+
+    private func launchHost(for action: FinderRequest, in folder: URL) {
+        let extensionURL = Bundle(for: FinderMenu.self).bundleURL
+        let host = extensionURL.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        guard let request = action.url(for: folder) else { NSSound.beep(); return }
+        let handoff = NSWorkspace.OpenConfiguration()
+        handoff.createsNewApplicationInstance = true
+        handoff.addsToRecentItems = false
+        NSWorkspace.shared.open([request], withApplicationAt: host, configuration: handoff) { _, failure in
+            if let failure {
+                Logger(subsystem: "local.finder-to-iterm", category: "FinderMenu")
+                    .error("Could not launch the containing app: \((failure as NSError).code)")
+                DispatchQueue.main.async { NSSound.beep() }
             }
         }
     }
 
     @objc private func copyPath(_ sender: NSMenuItem) {
-        guard let folder = sender.representedObject as? URL ?? FIFinderSyncController.default().targetedURL() else { return }
+        guard let folder = targetFolder(for: sender) else { return }
         if !FolderActions.copyPath(of: folder) { NSSound.beep() }
     }
 }
