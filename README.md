@@ -1,5 +1,7 @@
 # f2s
 
+**简体中文** · [English](README.en.md)
+
 从 Finder 工具栏用终端打开当前文件夹、复制路径或新建文件。支持 macOS 11 及以上版本，适用于 Apple 芯片和 Intel Mac。
 
 <p>
