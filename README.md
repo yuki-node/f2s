@@ -39,7 +39,7 @@ cd f2s
 bash build.sh
 ```
 
-构建产物位于 `build/`，包括 `f2s.app` 和带版本号的 `.pkg` 安装包。发布 GitHub Release 时，将同一安装包也以 `f2s.pkg` 为名上传，安装说明中的下载链接就会指向最新正式版。
+构建产物位于 `build/`，包括 `f2s.app` 和带版本号的 `.pkg` 安装包。每个 GitHub Release 只上传一份安装包，统一命名为 `f2s.pkg`，以便安装说明中的下载链接始终指向最新正式版。
 
 ## 项目结构
 
