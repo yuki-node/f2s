@@ -1,5 +1,6 @@
 import AppKit
 import FinderSync
+import OSLog
 
 @objc(F2SFinderMenu)
 final class FinderMenu: FIFinderSync {
@@ -33,8 +34,25 @@ final class FinderMenu: FIFinderSync {
 
     @objc private func openShell(_ sender: NSMenuItem) {
         guard let folder = sender.representedObject as? URL ?? FIFinderSyncController.default().targetedURL() else { return }
-        FolderActions.openShell(in: folder) { error in
-            if let error { NSAlert(error: error).runModal() }
+        let directLaunch = NSWorkspace.OpenConfiguration()
+        directLaunch.promptsUserIfNeeded = false
+        FolderActions.openShell(in: folder, configuration: directLaunch) { error in
+            guard error != nil else { return }
+            // A sandboxed extension cannot always pass a protected folder to another app.
+            // Never run a modal alert here: Finder needs this process to serve the next menu.
+            let extensionURL = Bundle(for: FinderMenu.self).bundleURL
+            let host = extensionURL.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            guard let request = ShellRequest.url(for: folder) else { NSSound.beep(); return }
+            let handoff = NSWorkspace.OpenConfiguration()
+            handoff.createsNewApplicationInstance = true
+            handoff.addsToRecentItems = false
+            NSWorkspace.shared.open([request], withApplicationAt: host, configuration: handoff) { _, failure in
+                if let failure {
+                    Logger(subsystem: "local.finder-to-iterm", category: "FinderMenu")
+                        .error("Could not launch the containing app: \((failure as NSError).code)")
+                    DispatchQueue.main.async { NSSound.beep() }
+                }
+            }
         }
     }
 

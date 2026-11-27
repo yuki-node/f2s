@@ -1,9 +1,10 @@
 import AppKit
 
 enum FolderActions {
-    static func openShell(in directory: URL, completion: @escaping (Error?) -> Void) {
+    static func openShell(in directory: URL, configuration: NSWorkspace.OpenConfiguration = .init(),
+                          completion: @escaping (Error?) -> Void) {
         let terminal = terminalApplication(for: directory)
-        NSWorkspace.shared.open([directory], withApplicationAt: terminal, configuration: .init()) { _, error in
+        NSWorkspace.shared.open([directory], withApplicationAt: terminal, configuration: configuration) { _, error in
             DispatchQueue.main.async { completion(error) }
         }
     }

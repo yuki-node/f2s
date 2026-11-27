@@ -29,6 +29,8 @@ bash build.sh
 
 f2s 优先使用 macOS 为 Unix 可执行文件登记的默认终端（Shell 角色）。如果你使用 iTerm2，可在其应用菜单中选择 **Make iTerm2 Default Term**。如果该关联不可用，f2s 会尝试与 `.command` 文件关联的终端，最后回退到系统「终端」。
 
+如果系统阻止 Finder 扩展直接打开文件夹，f2s 主应用会核对当前 Finder 路径并重试。首次重试时，macOS 可能询问是否允许 f2s 访问 Finder。
+
 ## 项目结构
 
 | 路径 | 内容 |

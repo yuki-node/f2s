@@ -7,6 +7,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var directory: URL?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // URL launches are handled by application(_:open:); only direct launches show the panel.
+        if notification.userInfo?[NSApplication.launchIsDefaultUserInfoKey] as? Bool == false { return }
         if !FIFinderSyncController.isExtensionEnabled {
             NSApp.activate(ignoringOtherApps: true)
             let alert = NSAlert()
@@ -24,6 +26,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         do {
             directory = try FinderDirectory.current()
             showActions(at: point)
+        } catch {
+            finishWithAlert("无法获取 Finder 目录", detail: error.localizedDescription)
+        }
+    }
+
+    func application(_ application: NSApplication, open urls: [URL]) {
+        guard let request = urls.first else { return }
+        do {
+            let current = try FinderDirectory.current()
+            // Launch Services URLs can also arrive from other apps. Only operate on the
+            // real Finder directory, and only if it is still the one from the original click.
+            guard ShellRequest.matches(request, currentDirectory: current) else {
+                finishWithAlert("无法打开终端", detail: "请在目标 Finder 窗口中重新选择 Open Shell。")
+                return
+            }
+            directory = current
+            openShell()
         } catch {
             finishWithAlert("无法获取 Finder 目录", detail: error.localizedDescription)
         }
