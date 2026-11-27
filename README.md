@@ -2,11 +2,13 @@
 
 f2s 在 macOS Finder 工具栏中添加一个原生下拉菜单，方便你在当前文件夹打开终端、复制路径或创建文件。
 
-![Finder 工具栏中的 f2s 菜单已展开，显示 Open Shell 和 Copy Path 两个选项](docs/images/finder-toolbar-menu.png)
+![Finder 工具栏中的 f2s 菜单展开后显示 Open Shell、Copy Path 和 New File…](docs/images/finder-toolbar-menu.png)
 
 - **Open Shell** 在当前文件夹打开用户配置的终端，例如 iTerm2 或系统「终端」。新会话使用该终端配置的 shell。
 - **Copy Path** 将当前文件夹的绝对路径以纯文本复制到剪贴板，保留中文、空格和特殊字符。
 - **New File…** 输入完整文件名（例如 `test.txt`、`test.log` 或 `.gitignore`），按回车即可在当前文件夹创建空文件，并在 Finder 中选中它。同名时可以重新输入。
+
+![New File 弹窗显示当前目录、文件名输入框和 Create 按钮](docs/images/new-file-dialog.png)
 
 支持 macOS 11 及以上版本，安装包同时包含 Apple 芯片和 Intel 架构。
 
