@@ -2,6 +2,8 @@
 
 f2s 在 macOS Finder 工具栏中添加一个原生下拉菜单，方便你在浏览文件夹时使用终端。
 
+![Finder 工具栏中的 f2s 菜单已展开，显示 Open Shell 和 Copy Path 两个选项](docs/images/finder-toolbar-menu.png)
+
 - **Open Shell** 在当前文件夹打开用户配置的终端，例如 iTerm2 或系统「终端」。新会话使用该终端配置的 shell。
 - **Copy Path** 将当前文件夹的绝对路径以纯文本复制到剪贴板，保留中文、空格和特殊字符。
 
