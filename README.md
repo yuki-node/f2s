@@ -7,7 +7,9 @@ f2s 在 macOS Finder 工具栏中添加一个原生下拉菜单，方便你在�
 ## 安装与使用
 
 1. [下载最新版 f2s.dmg](https://github.com/yuki-node/f2s/releases/latest/download/f2s.dmg)，双击打开，将左侧的 **f2s** 拖到右侧的 **Applications（应用程序）** 文件夹。如果替换旧版时提示正在使用，请先在旧版菜单中选择 **Quit f2s**（如有）。
-2. 拷贝完成后推出磁盘映像，从「应用程序」打开 **f2s**。首次使用时，按提示点击「启用 f2s」。
+2. 从系统「应用程序」打开刚拷入的 **f2s**。如果升级后打开 f2s 会直接弹出终端，请检查个人「应用程序」（`~/Applications`）里是否还留有早期的 f2s。确认系统「应用程序」中已有新版后，可将个人目录中的旧版移到废纸篓。
+   如果看到「未打开 ‘f2s’」且提示 Apple 无法验证应用，先点「完成」。确认下载来源可信后，双击 DMG 中的 **首次打开说明.html**，点击其中的链接打开「隐私与安全性」。也可以从苹果菜单进入「系统设置」→「隐私与安全性」，在「安全性」下找到 f2s，点「仍要打开」并按提示确认。[Apple 官方说明](https://support.apple.com/zh-cn/102445)
+   首次启动后，点「启用 f2s」直接启用 Finder 扩展。如果看到「f2s 已启用」，点「好」即可。随后可以推出磁盘映像。
 3. 在 Finder 中打开文件夹，点击工具栏的 **f2s** 图标即可使用。若扩展已启用但按钮仍不可见，可在 Finder 的「显示 → 自定义工具栏」中添加 f2s。
 
 f2s 优先使用 macOS 为 Unix 可执行文件登记的默认终端（Shell 角色）。如果你使用 iTerm2，可在其应用菜单中选择 **Make iTerm2 Default Term**。如果该关联不可用，f2s 会尝试与 `.command` 文件关联的终端，最后回退到系统「终端」。
@@ -21,7 +23,7 @@ f2s 优先使用 macOS 为 Unix 可执行文件登记的默认终端（Shell 角
 - **Open Shell** 在当前文件夹打开用户配置的终端，例如 iTerm2 或系统「终端」。新会话使用该终端配置的 shell。
 - **Copy Path** 将当前文件夹的绝对路径以纯文本复制到剪贴板，保留中文、空格和特殊字符。
 - **New File…** 输入完整文件名（例如 `test.txt`、`test.log` 或 `.gitignore`），按回车即可在当前文件夹创建空文件，并在 Finder 中选中它。同名时可以重新输入。
-- **Quit f2s** 关闭当前账户的 f2s 窗口并停用 Finder 扩展。工具栏按钮消失后，即可在「应用程序」中将 f2s 移到废纸篓。若要恢复工具栏按钮，重新打开 f2s 并选择「启用 f2s」。
+- **Quit f2s** 关闭当前账户的 f2s 窗口并停用 Finder 扩展。要恢复工具栏按钮，重新打开 f2s 并选择「启用 f2s」。
 
 <details>
 <summary>查看 New File… 弹窗</summary>
@@ -29,6 +31,10 @@ f2s 优先使用 macOS 为 Unix 可执行文件登记的默认终端（Shell 角
 <img src="docs/images/new-file-dialog.png" width="300" alt="New File 弹窗显示当前目录、文件名输入框和 Create 按钮">
 
 </details>
+
+## 卸载
+
+如果 Finder 工具栏里有 f2s，先从它的菜单选择 **Quit f2s**。然后在 Finder 的「应用程序」里选中 **f2s**，按 **⌘⌫** 将它移到废纸篓。macOS 通常会自动从启动台移除图标，无需清空废纸篓。如果以前也在个人「应用程序」（`~/Applications`）里安装过 f2s，卸载时请一并检查那份副本。[Apple 卸载说明](https://support.apple.com/zh-cn/102610)
 
 ## 从源码构建
 

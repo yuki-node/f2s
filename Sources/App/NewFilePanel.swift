@@ -30,8 +30,9 @@ final class NewFilePanel: NSPanel {
         header.alignment = .centerY
         header.spacing = 6
 
-        let path = NSTextField(labelWithString: directory.path)
-        path.lineBreakMode = .byTruncatingMiddle
+        let path = NSTextField(wrappingLabelWithString: directory.path)
+        path.lineBreakMode = .byCharWrapping
+        path.preferredMaxLayoutWidth = width - 2 * inset
         path.alignment = .center
         path.toolTip = directory.path
         path.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
