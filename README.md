@@ -6,9 +6,9 @@ f2s 在 macOS Finder 工具栏中添加一个原生下拉菜单，方便你在�
 
 ## 安装与使用
 
-1. [下载最新版 f2s 安装包](https://github.com/yuki-node/f2s/releases/latest/download/f2s.pkg)，双击 `.pkg` 并按提示安装。应用会安装到 `/Applications/f2s.app`，安装程序会为当前桌面账户注册 Finder 扩展。
-2. 在 Finder 中打开文件夹，单击工具栏的 **f2s** 图标，选择所需操作。
-3. 如果看不到按钮，从「应用程序」打开 f2s，按提示启用 Finder 扩展。已启用时，可在 Finder 的「显示 → 自定工具栏」中添加 f2s 按钮。其他账户可以单独启用或停用扩展。
+1. [下载最新版 f2s.dmg](https://github.com/yuki-node/f2s/releases/latest/download/f2s.dmg)，双击打开，将左侧的 **f2s** 拖到右侧的 **Applications（应用程序）** 文件夹。如果替换旧版时提示正在使用，请先在旧版菜单中选择 **Quit f2s**（如有）。
+2. 拷贝完成后推出磁盘映像，从「应用程序」打开 **f2s**。首次使用时，按提示点击「启用 f2s」。
+3. 在 Finder 中打开文件夹，点击工具栏的 **f2s** 图标即可使用。若扩展已启用但按钮仍不可见，可在 Finder 的「显示 → 自定义工具栏」中添加 f2s。
 
 f2s 优先使用 macOS 为 Unix 可执行文件登记的默认终端（Shell 角色）。如果你使用 iTerm2，可在其应用菜单中选择 **Make iTerm2 Default Term**。如果该关联不可用，f2s 会尝试与 `.command` 文件关联的终端，最后回退到系统「终端」。
 
@@ -21,6 +21,7 @@ f2s 优先使用 macOS 为 Unix 可执行文件登记的默认终端（Shell 角
 - **Open Shell** 在当前文件夹打开用户配置的终端，例如 iTerm2 或系统「终端」。新会话使用该终端配置的 shell。
 - **Copy Path** 将当前文件夹的绝对路径以纯文本复制到剪贴板，保留中文、空格和特殊字符。
 - **New File…** 输入完整文件名（例如 `test.txt`、`test.log` 或 `.gitignore`），按回车即可在当前文件夹创建空文件，并在 Finder 中选中它。同名时可以重新输入。
+- **Quit f2s** 关闭当前账户的 f2s 窗口并停用 Finder 扩展。工具栏按钮消失后，即可在「应用程序」中将 f2s 移到废纸篓。若要恢复工具栏按钮，重新打开 f2s 并选择「启用 f2s」。
 
 <details>
 <summary>查看 New File… 弹窗</summary>
@@ -39,7 +40,7 @@ cd f2s
 bash build.sh
 ```
 
-构建产物位于 `build/`，包括 `f2s.app` 和带版本号的 `.pkg` 安装包。每个 GitHub Release 只上传一份安装包，统一命名为 `f2s.pkg`，以便安装说明中的下载链接始终指向最新正式版。
+构建产物位于 `build/`，包括 `f2s.app` 和可分发的只读磁盘映像 `f2s.dmg`。每个 GitHub Release 上传一个 `f2s.dmg`，上面的下载链接会指向最新版。
 
 ## 项目结构
 
@@ -49,10 +50,10 @@ bash build.sh
 | `Sources/App/` | 主应用、Finder 目录读取和旧版工具栏迁移 |
 | `Sources/Shared/` | 主应用和扩展共用的终端选择与路径复制逻辑 |
 | `Resources/` | 应用配置、权限声明和图标 |
-| `Installer/` | 安装包配置及安装后脚本 |
+| `Installer/` | DMG 的 Finder 窗口布局 |
 
 ## 签名与公证
 
-默认构建对应用和扩展使用本地临时签名，生成的安装包未经 Developer ID 签名和 Apple 公证。在其他 Mac 上安装时可能遇到 Gatekeeper 提示。[Apple 安装说明](https://support.apple.com/zh-cn/102445)
+默认构建对应用及其内嵌组件使用本地临时签名，DMG 未经 Developer ID 签名和 Apple 公证。在其他 Mac 上首次打开应用时可能遇到 Gatekeeper 提示。[Apple 安装说明](https://support.apple.com/zh-cn/102445)
 
-使用 Developer ID 分发时，将 `APP_SIGNING_IDENTITY` 和 `INSTALLER_SIGNING_IDENTITY` 分别设为钥匙串中的 Developer ID Application 和 Developer ID Installer 证书名称，再执行 `bash build.sh`。同时设置 `NOTARYTOOL_PROFILE` 后，构建脚本会提交公证并将票据附加到安装包。
+使用 Developer ID 分发时，将 `APP_SIGNING_IDENTITY` 设为钥匙串中的 Developer ID Application 证书名称，再执行 `bash build.sh`。同时设置 `NOTARYTOOL_PROFILE` 后，构建脚本会提交 DMG 公证并将票据附加到磁盘映像。

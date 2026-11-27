@@ -13,11 +13,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             NSApp.activate(ignoringOtherApps: true)
             let alert = NSAlert()
             alert.messageText = "启用 f2s 的 Finder 扩展"
-            alert.informativeText = "在扩展设置中打开 f2s，即可从 Finder 工具栏展开菜单。"
-            alert.addButton(withTitle: "打开扩展设置")
+            if #available(macOS 15, *) {
+                alert.informativeText = "点「启用 f2s」即可使用工具栏菜单。也可以在系统设置的「登录项与扩展 → 访达」中手动管理。"
+            } else {
+                alert.informativeText = "点「启用 f2s」即可使用工具栏菜单。也可以在系统的扩展设置中手动管理。"
+            }
+            alert.addButton(withTitle: "启用 f2s")
             alert.addButton(withTitle: "取消")
-            if alert.runModal() == .alertFirstButtonReturn {
-                FIFinderSyncController.showExtensionManagementInterface()
+            alert.addButton(withTitle: "在系统设置中管理…")
+            switch alert.runModal() {
+            case .alertFirstButtonReturn:
+                do {
+                    FinderToolbar.prepareToShowExtension(ExtensionElection.identifier)
+                    try ExtensionElection.setEnabled(true)
+                } catch {
+                    finishWithAlert("无法启用 f2s", detail: error.localizedDescription)
+                    return
+                }
+            case .alertThirdButtonReturn:
+                openExtensionSettings()
+                return
+            default: break
             }
             NSApp.terminate(nil)
             return
@@ -28,6 +44,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             showActions(at: point)
         } catch {
             finishWithAlert("无法获取 Finder 目录", detail: error.localizedDescription)
+        }
+    }
+
+    private func openExtensionSettings() {
+        if #available(macOS 15, *) {
+            let url = URL(string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension")!
+            let configuration = NSWorkspace.OpenConfiguration()
+            configuration.activates = true
+            NSWorkspace.shared.open(url, configuration: configuration) { _, error in
+                DispatchQueue.main.async {
+                    if error != nil {
+                        self.finishWithAlert("无法打开扩展设置", detail: "请打开「系统设置 → 通用 → 登录项与扩展」，在「访达」中管理 f2s。")
+                    } else {
+                        NSApp.terminate(nil)
+                    }
+                }
+            }
+        } else {
+            FIFinderSyncController.showExtensionManagementInterface()
+            NSApp.terminate(nil)
         }
     }
 
@@ -54,7 +90,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func showActions(at point: NSPoint) {
         let actions = [("Open Shell", "terminal", #selector(openShell)),
                        ("Copy Path", "doc.on.doc", #selector(copyPath)),
-                       ("New File…", "doc.badge.plus", #selector(newFile))]
+                       ("New File…", "doc.badge.plus", #selector(newFile)),
+                       ("Quit f2s", "power", #selector(quitF2S))]
         let size = NSSize(width: 152, height: CGFloat(actions.count * 30 + 8))
         let panel = ActionPanel(contentRect: NSRect(origin: .zero, size: size),
                                 styleMask: [.borderless], backing: .buffered, defer: false)
@@ -133,6 +170,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             NSWorkspace.shared.activateFileViewerSelecting([file])
         }
         NSApp.terminate(nil)
+    }
+
+    @objc private func quitF2S() {
+        QuitLauncher.launch(from: Bundle.main.bundleURL)
     }
 
     private func finishWithAlert(_ title: String, detail: String) {

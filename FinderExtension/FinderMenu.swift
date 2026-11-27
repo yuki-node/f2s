@@ -30,6 +30,7 @@ final class FinderMenu: FIFinderSync {
             item.representedObject = folder
             item.isEnabled = folder?.isFileURL == true
         }
+        menu.addItem(withTitle: "Quit f2s", action: #selector(quitF2S), keyEquivalent: "").target = self
         return menu
     }
 
@@ -55,14 +56,21 @@ final class FinderMenu: FIFinderSync {
         launchHost(for: .newFile, in: folder)
     }
 
-    private func launchHost(for action: FinderRequest, in folder: URL) {
+    private var hostURL: URL {
         let extensionURL = Bundle(for: FinderMenu.self).bundleURL
-        let host = extensionURL.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        return extensionURL.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+    }
+
+    @objc private func quitF2S() {
+        QuitLauncher.launch(from: hostURL)
+    }
+
+    private func launchHost(for action: FinderRequest, in folder: URL) {
         guard let request = action.url(for: folder) else { NSSound.beep(); return }
         let handoff = NSWorkspace.OpenConfiguration()
         handoff.createsNewApplicationInstance = true
         handoff.addsToRecentItems = false
-        NSWorkspace.shared.open([request], withApplicationAt: host, configuration: handoff) { _, failure in
+        NSWorkspace.shared.open([request], withApplicationAt: hostURL, configuration: handoff) { _, failure in
             if let failure {
                 Logger(subsystem: "local.finder-to-iterm", category: "FinderMenu")
                     .error("Could not launch the containing app: \((failure as NSError).code)")

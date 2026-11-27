@@ -9,6 +9,22 @@ enum FinderToolbar {
     private static let fileItem = "com.apple.finder.loc "
     private static let urlKey = "_CFURLString"
 
+    static func prepareToShowExtension(_ identifier: String) {
+        let finder = bundleIdentifier as CFString
+        // Finder removes the toolbar item on disable but remembers auto-adding it.
+        // On explicit enable, let Finder place it again using its own current layout.
+        let historyKey = "FXSyncExtensionToolbarItemsAutomaticallyAdded" as CFString
+        guard CFPreferencesAppSynchronize(finder),
+              !CFPreferencesAppValueIsForced(historyKey, finder),
+              !CFPreferencesAppValueIsForced(configurationKey as CFString, finder),
+              let history = CFPreferencesCopyAppValue(historyKey, finder) as? [String],
+              history.contains(identifier) else { return }
+        let layout = CFPreferencesCopyAppValue(configurationKey as CFString, finder) as? [String: Any]
+        if let items = layout?[itemsKey] as? [String], items.contains(identifier) { return }
+        CFPreferencesSetAppValue(historyKey, history.filter { $0 != identifier } as CFArray, finder)
+        CFPreferencesAppSynchronize(finder)
+    }
+
     static func removeLegacyButtons(appURL: URL) throws -> Bool {
         let domain = bundleIdentifier as CFString
         let key = configurationKey as CFString
