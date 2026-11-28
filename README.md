@@ -43,3 +43,7 @@ bash build.sh
 ```
 
 输出文件为 `build/f2s.app` 和 `build/f2s.dmg`。默认构建使用本地临时签名。使用 Developer ID 签名时，设置 `APP_SIGNING_IDENTITY`。如需 Apple 公证，同时设置 `NOTARYTOOL_PROFILE`。
+
+## 支持项目
+
+[![请我喝杯咖啡，点击查看微信收款码](docs/images/buy-me-a-coffee.svg)](docs/images/wechat-pay.png)
