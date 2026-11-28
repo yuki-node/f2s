@@ -5,7 +5,15 @@ project_dir=$(cd -- "$(dirname -- "$0")" && pwd)
 build_dir="$project_dir/build"
 app_name='f2s.app'
 stage=$(mktemp -d "${TMPDIR:-/tmp}/finder-to-iterm.XXXXXXXX")
-trap 'rm -rf -- "$stage"' EXIT
+image_root="$stage/image-root"
+image_mounted=false
+cleanup() {
+    if "$image_mounted"; then
+        hdiutil detach "$image_root" || return
+    fi
+    rm -rf -- "$stage"
+}
+trap cleanup EXIT
 
 contents="$stage/$app_name/Contents"
 mkdir -p "$contents/MacOS" "$contents/Resources" "$build_dir"
@@ -56,14 +64,21 @@ else
 fi
 codesign --verify --deep --strict "$stage/$app_name"
 
-image_root="$stage/image-root"
-mkdir -p "$image_root"
+image_name="f2s.dmg"
+# Finder's background image reference belongs to the template volume.
+# Populate a writable copy so the arrow still resolves in the compressed DMG.
+writable_image="$stage/installer.dmg"
+hdiutil convert "$project_dir/Installer/FinderWindow.dmg" -format UDRW -o "$writable_image"
+app_kib=$(du -sk "$stage/$app_name" | cut -f1)
+hdiutil resize -size "$((app_kib + 16384))k" "$writable_image"
+hdiutil attach -nobrowse -noautoopen -mountpoint "$image_root" "$writable_image"
+image_mounted=true
 ditto "$stage/$app_name" "$image_root/$app_name"
 ln -s /Applications "$image_root/Applications"
 cp "$project_dir/Installer/首次打开说明.html" "$image_root/"
-cp "$project_dir/Installer/FinderLayout.dsstore" "$image_root/.DS_Store"
-image_name="f2s.dmg"
-hdiutil create -fs HFS+ -format UDZO -volname f2s -srcfolder "$image_root" "$stage/$image_name"
+hdiutil detach "$image_root"
+image_mounted=false
+hdiutil convert "$writable_image" -format UDZO -o "$stage/$image_name"
 
 if [[ -n "${APP_SIGNING_IDENTITY:-}" ]]; then
     codesign --timestamp --sign "$APP_SIGNING_IDENTITY" --identifier local.finder-to-iterm.dmg "$stage/$image_name"
